@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Piano Virtual</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+
+<!-- ══════════════════════════ PIANO PRINCIPAL ══════════════════════════ -->
+<div id="screen-piano" class="screen active">
+  <header class="user-bar">
+    <div class="user-info">
+      <div class="avatar" id="avatar-main">?</div>
+      <span class="username" id="display-name">Usuario</span>
+    </div>
+    <nav class="top-nav">
+      <button class="nav-btn" onclick="showScreen('screen-practice')">🎯 Práctica</button>
+      <button class="nav-btn" onclick="showScreen('screen-reto')">⚡ Reto</button>
+      <button class="nav-btn" onclick="showScreen('screen-melodias')">🎵 Melodías</button>
+      <button class="nav-btn" onclick="showScreen('screen-puntajes')">🏆 Puntajes</button>
+    </nav>
+    <button class="logout-btn" onclick="logout()">Cerrar Sesión</button>
+  </header>
+
+  <main class="main-stage">
+    <aside class="left-panel">
+      <div class="panel-section">
+        <h3 class="panel-title">Instrumento</h3>
+        <select id="sound-select" class="sound-select">
+          <option value="piano">🎹 Piano</option>
+          <option value="organ">🎸 Órgano</option>
+          <option value="synth">🎛️ Sintetizador</option>
+          <option value="marimba">🪘 Marimba</option>
+        </select>
+      </div>
+      <div class="panel-section">
+        <h3 class="panel-title">Canciones demo</h3>
+        <button class="song-btn" data-song="mary">🎵 Mary Had a Little Lamb</button>
+        <button class="song-btn" data-song="estrellita">🎵 Estrellita</button>
+        <button class="song-btn" data-song="cumpleanos">🎵 Cumpleaños Feliz</button>
+        <button class="song-btn" data-song="oda">🎵 Oda a la Alegría</button>
+        <button class="song-btn" data-song="canon">🎵 Cañón de Pachelbel</button>
+      </div>
+      <div class="panel-section">
+        <h3 class="panel-title">Nota tocada</h3>
+        <div id="note-label" class="note-label">—</div>
+      </div>
+    </aside>
+
+    <div class="piano-wrapper">
+      <div id="piano-keys"></div>
+      <div id="status-bar" class="status-bar"></div>
+    </div>
+
+    <aside class="controls-panel">
+      <div class="control-item">
+        <button class="round-btn play" id="btn-reproducir">▶</button>
+        <span>Reproducir</span>
+      </div>
+      <div class="control-item">
+        <button class="round-btn record" id="btn-grabar">⏺</button>
+        <span>Grabar</span>
+      </div>
+      <div class="control-item">
+        <button class="round-btn" style="background:rgba(0,0,0,0.5);color:white;font-size:16px" id="btn-guardar">💾</button>
+        <span>Guardar</span>
+      </div>
+    </aside>
+  </main>
+</div>
+
+<!-- ══════════════════════════ PRÁCTICA ══════════════════════════ -->
+<div id="screen-practice" class="screen">
+  <header class="user-bar">
+    <div class="user-info">
+      <div class="avatar" id="avatar-p">?</div>
+      <span style="font-weight:700">Modo Práctica</span>
+    </div>
+    <button class="logout-btn" onclick="showScreen('screen-piano')">← Volver</button>
+  </header>
+  <main class="modal-stage">
+    <div class="modal-card">
+
+      <div>
+        <h3 id="practice-song-name" style="font-size:18px;margin-bottom:12px">Elige una canción</h3>
+        <div class="song-selector-row">
+          <button class="song-chip active-chip" onclick="selectPracticeSong('mary',this)">⭐ Mary Had a Little Lamb</button>
+          <button class="song-chip"             onclick="selectPracticeSong('estrellita',this)">⭐ Estrellita</button>
+          <button class="song-chip"             onclick="selectPracticeSong('cumpleanos',this)">⭐⭐ Cumpleaños Feliz</button>
+          <button class="song-chip"             onclick="selectPracticeSong('oda',this)">⭐⭐ Oda a la Alegría</button>
+          <button class="song-chip"             onclick="selectPracticeSong('canon',this)">⭐⭐⭐ Cañón de Pachelbel</button>
+        </div>
+      </div>
+
+      <div id="note-sequence" class="note-sequence"></div>
+
+      <div class="progress-wrap">
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+        <div class="progress-meta">
+          <span id="progress-pct">Progreso: 0%</span>
+          <span id="practice-score">Puntos: 0</span>
+        </div>
+      </div>
+
+      <div class="hint-box" id="hint-box">Selecciona una canción y presiona Iniciar</div>
+
+      <!-- CENTRADO con mini-piano-wrap -->
+      <div class="mini-piano-wrap">
+        <div id="practice-piano" class="mini-piano"></div>
+      </div>
+
+      <div class="practice-controls">
+        <button class="pill-btn"      onclick="startPractice()">▶ Iniciar</button>
+        <button class="pill-btn gray" onclick="resetPractice()">↺ Reiniciar</button>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- ══════════════════════════ RETO ══════════════════════════ -->
+<div id="screen-reto" class="screen">
+  <header class="user-bar">
+    <div class="user-info">
+      <div class="avatar" id="avatar-r">?</div>
+      <span style="font-weight:700">Modo Reto</span>
+    </div>
+    <button class="logout-btn" onclick="showScreen('screen-piano')">← Volver</button>
+  </header>
+  <main class="modal-stage">
+    <div class="modal-card reto-card">
+
+      <div class="reto-header">
+        <select class="sound-select" style="min-width:210px" onchange="prepareReto(this.value)">
+          <option value="mary">⭐ Mary Had a Little Lamb</option>
+          <option value="estrellita">⭐ Estrellita</option>
+          <option value="cumpleanos">⭐⭐ Cumpleaños Feliz</option>
+          <option value="oda">⭐⭐ Oda a la Alegría</option>
+          <option value="canon">⭐⭐⭐ Cañón de Pachelbel</option>
+        </select>
+        <div class="reto-stat">
+          <span class="reto-label">Puntos</span>
+          <div id="reto-score" class="reto-value">0</div>
+        </div>
+        <div class="reto-stat">
+          <span class="reto-label">Combo</span>
+          <div id="reto-combo" class="reto-value">x1</div>
+        </div>
+        <div class="reto-stat">
+          <span class="reto-label">Vidas</span>
+          <div id="reto-lives" class="reto-value" style="font-size:20px">❤️❤️❤️</div>
+        </div>
+      </div>
+
+      <div class="tiles-arena" id="tiles-arena">
+        <div class="tiles-overlay" id="tiles-overlay">
+          <div style="font-size:20px;font-weight:700;text-align:center">
+            ¡Toca las teclas que caen antes de que lleguen abajo!
+          </div>
+          <button class="pill-btn" onclick="startReto()">▶ Iniciar Reto</button>
+        </div>
+      </div>
+
+      <!-- CENTRADO con reto-piano-wrap -->
+      <div class="reto-piano-wrap">
+        <div id="reto-piano" class="reto-piano-row"></div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- ══════════════════════════ MELODÍAS ══════════════════════════ -->
+<div id="screen-melodias" class="screen">
+  <header class="user-bar">
+    <div class="user-info">
+      <div class="avatar" id="avatar-m">?</div>
+      <span style="font-weight:700">Mis Melodías</span>
+    </div>
+    <button class="logout-btn" onclick="showScreen('screen-piano')">← Volver</button>
+  </header>
+  <main class="modal-stage">
+    <div class="modal-card">
+      <div class="mel-toolbar">
+        <span style="font-size:13px;color:rgba(255,255,255,0.45)">Melodías guardadas localmente</span>
+        <button class="pill-btn small" onclick="loadMelodias()">↺ Refrescar</button>
+      </div>
+      <div id="melodias-list" class="melodias-list">
+        <p class="empty-msg">Aún no hay melodías. ¡Graba una en el piano!</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ══════════════════════════ PUNTAJES ══════════════════════════ -->
+<div id="screen-puntajes" class="screen">
+  <header class="user-bar">
+    <div class="user-info">
+      <div class="avatar" id="avatar-s">?</div>
+      <span style="font-weight:700">Puntajes</span>
+    </div>
+    <button class="logout-btn" onclick="showScreen('screen-piano')">← Volver</button>
+  </header>
+  <main class="modal-stage">
+    <div class="modal-card">
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Mi puntaje</div>
+          <div class="stat-val" id="my-score">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Melodías</div>
+          <div class="stat-val" id="my-melodias-count">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Notas tocadas</div>
+          <div class="stat-val" id="my-notes-count">0</div>
+        </div>
+      </div>
+      <div class="leaderboard-card">
+        <div class="lb-title">Tabla de líderes</div>
+        <div id="ranking-list"></div>
+      </div>
+      <div class="logros-card">
+        <div class="lb-title">Mis logros</div>
+        <div id="logros-list" class="logros-row"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script type="module" src="/src/main.ts"></script>
+</body>
+</html>

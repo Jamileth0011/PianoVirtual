@@ -1,0 +1,422 @@
+/* ─── VARIABLES ────────────────────────── */
+:root {
+  --rojo: #9e0d0d;
+  --rojo-claro: #ff3131;
+  --panel: rgba(0,0,0,0.38);
+  --card: rgba(0,0,0,0.50);
+  --border: rgba(255,255,255,0.09);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--rojo);
+  font-family: 'Nunito', sans-serif;
+  color: white;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ─── PANTALLAS ─────────────────────────── */
+.screen { display: none; height: 100vh; flex-direction: column; }
+.screen.active { display: flex; }
+
+/* ─── HEADER ────────────────────────────── */
+.user-bar {
+  background: rgba(0,0,0,0.80);
+  padding: 10px 22px;
+  display: flex; align-items: center;
+  justify-content: space-between;
+  gap: 10px; border-bottom: 1px solid var(--border);
+  flex-shrink: 0; flex-wrap: wrap;
+}
+
+.user-info { display: flex; align-items: center; gap: 9px; }
+
+.avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--rojo-claro); border: 2px solid white;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 14px; flex-shrink: 0;
+}
+
+.username { font-weight: 700; font-size: 15px; }
+
+.top-nav { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.nav-btn {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.14);
+  color: white; padding: 7px 13px; border-radius: 8px;
+  cursor: pointer; font-size: 13px;
+  font-family: 'Nunito', sans-serif;
+  transition: background 0.15s;
+}
+.nav-btn:hover { background: rgba(255,255,255,0.16); }
+
+.logout-btn {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.28);
+  color: white; padding: 7px 14px; border-radius: 8px;
+  cursor: pointer; font-size: 13px; white-space: nowrap;
+  transition: background 0.15s;
+}
+.logout-btn:hover { background: rgba(255,255,255,0.08); }
+
+/* ─── LAYOUT PIANO PRINCIPAL ──────────── */
+.main-stage {
+  flex: 1; display: flex;
+  justify-content: center; align-items: center;
+  gap: 18px; padding: 0 14px; overflow: hidden;
+}
+
+.left-panel, .controls-panel {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 12px; padding: 14px 12px;
+  display: flex; flex-direction: column; gap: 16px;
+  min-width: 150px; max-width: 175px;
+}
+
+.panel-section { display: flex; flex-direction: column; gap: 7px; }
+
+.panel-title {
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 0.1em; color: rgba(255,255,255,0.4);
+  text-transform: uppercase;
+}
+
+.sound-select {
+  background: rgba(0,0,0,0.45);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: white; padding: 8px 10px; border-radius: 8px;
+  font-family: 'Nunito', sans-serif; font-size: 13px;
+  cursor: pointer; width: 100%;
+}
+
+.song-btn {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: white; padding: 8px 10px; border-radius: 8px;
+  cursor: pointer; font-size: 12px;
+  font-family: 'Nunito', sans-serif;
+  text-align: left; transition: background 0.15s;
+}
+.song-btn:hover { background: rgba(255,255,255,0.14); }
+
+.note-label {
+  font-family: 'Bebas Neue', sans-serif; font-size: 40px;
+  text-align: center; color: var(--rojo-claro);
+  opacity: 0; transition: opacity 0.3s;
+}
+
+/* ─── PIANO PRINCIPAL ─────────────────── */
+.piano-wrapper {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 10px;
+}
+
+/* El contenedor del piano usa posición relativa y flex
+   El ancho se establece dinámicamente en JS */
+#piano-keys, #practice-piano, #reto-piano {
+  position: relative;
+  display: flex;
+  background: rgba(0,0,0,0.28);
+  border-radius: 10px 10px 0 0;
+  border: 1px solid var(--border);
+  border-bottom: none;
+  user-select: none;
+  /* Padding se aplica en JS pero necesitamos definir comportamiento */
+  flex-shrink: 0;
+}
+
+#piano-keys {
+  padding: 14px 14px 0;
+  height: calc(200px + 14px); /* altura blanca + padding top */
+}
+#practice-piano {
+  padding: 10px 10px 0;
+  height: calc(110px + 10px);
+}
+#reto-piano {
+  padding: 8px 8px 0;
+  height: calc(80px + 8px);
+}
+
+/* TECLAS */
+.key {
+  cursor: pointer;
+  display: flex; align-items: flex-end; justify-content: center;
+  padding-bottom: 8px;
+}
+
+.key.white {
+  background: linear-gradient(180deg, #f5f5f5, #fff);
+  border: 1px solid #bbb;
+  border-radius: 0 0 7px 7px;
+  position: relative; z-index: 1;
+  transition: background 0.07s;
+}
+.key.white:hover { background: #ffe5e5; }
+
+.key.black {
+  background: linear-gradient(180deg, #222, #000);
+  border-radius: 0 0 5px 5px;
+  position: absolute; z-index: 2;
+  transition: background 0.07s;
+}
+.key.black:hover { background: linear-gradient(180deg, #500, #200); }
+
+.key.active { background: var(--rojo-claro) !important; }
+.key.active .key-label { color: white !important; }
+.key.hint-key { background: #ffe000 !important; }
+
+.key-label { font-size: 10px; font-weight: 700; pointer-events: none; }
+.key.white .key-label { color: #666; }
+.key.black .key-label { color: rgba(255,255,255,0.6); }
+
+.status-bar {
+  font-size: 13px; color: rgba(255,255,255,0.6);
+  height: 20px; text-align: center;
+}
+
+/* ─── BOTONES CIRCULARES ──────────────── */
+.controls-panel { align-items: center; min-width: 100px; }
+
+.control-item {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 5px;
+  font-size: 11px; color: rgba(255,255,255,0.6);
+}
+
+.round-btn {
+  width: 52px; height: 52px; border-radius: 50%;
+  border: 3px solid rgba(255,255,255,0.22);
+  cursor: pointer; font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform 0.1s;
+}
+.round-btn:active { transform: scale(0.91); }
+.round-btn.play   { background: rgba(0,0,0,0.55); color: white; }
+.round-btn.record { background: var(--rojo-claro); color: white; }
+.round-btn.recording { border-color: white; animation: pulse 1s infinite; }
+
+@keyframes pulse {
+  0%,100% { box-shadow: 0 0 0 0   rgba(255,49,49,0.7); }
+  50%      { box-shadow: 0 0 0 9px rgba(255,49,49,0);   }
+}
+
+/* ─── PANTALLAS MODALES ──────────────── */
+.modal-stage {
+  flex: 1; overflow-y: auto;
+  display: flex; justify-content: center;
+  padding: 24px 20px;
+}
+
+/* Centrado vertical en pantallas grandes */
+@media (min-height: 580px) {
+  .modal-stage { align-items: center; }
+}
+
+.modal-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 16px; padding: 26px 24px;
+  width: 100%; max-width: 900px;
+  display: flex; flex-direction: column; gap: 18px;
+}
+
+/* ─── PRÁCTICA ───────────────────────── */
+.song-selector-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.song-chip {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.65);
+  padding: 8px 16px; border-radius: 20px;
+  cursor: pointer; font-size: 13px;
+  font-family: 'Nunito', sans-serif; transition: all 0.15s;
+}
+.song-chip:hover { background: rgba(255,255,255,0.14); }
+.active-chip {
+  background: var(--rojo-claro) !important;
+  color: white !important;
+  border-color: var(--rojo-claro) !important;
+}
+
+.note-sequence {
+  display: flex; gap: 8px;
+  overflow-x: auto; padding-bottom: 4px;
+  min-height: 54px; align-items: center;
+  scrollbar-width: none;
+}
+.note-sequence::-webkit-scrollbar { display: none; }
+
+.note-chip {
+  width: 42px; height: 42px; flex-shrink: 0;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700;
+  border: 2px solid transparent;
+  transition: transform 0.15s;
+}
+.nc-done    { background: #2d7a2d; color: white; }
+.nc-current { background: white; color: var(--rojo); border-color: #ffe000; transform: scale(1.15); }
+.nc-pending { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.45); }
+
+.progress-wrap { display: flex; flex-direction: column; gap: 6px; }
+.progress-bar  { background: rgba(0,0,0,0.4); border-radius: 20px; height: 9px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--rojo-claro); border-radius: 20px; transition: width 0.35s; }
+.progress-meta {
+  display: flex; justify-content: space-between;
+  font-size: 13px; color: rgba(255,255,255,0.55);
+}
+
+.hint-box {
+  background: rgba(0,0,0,0.28); border-radius: 10px;
+  padding: 12px 16px; font-size: 14px;
+  color: rgba(255,255,255,0.85);
+  border-left: 4px solid #ffe000;
+}
+
+/* ── Mini-piano centrado ── */
+.mini-piano-wrap {
+  display: flex;
+  justify-content: center;   /* ← centra el piano horizontalmente */
+  width: 100%;
+  overflow-x: auto;
+  padding: 4px 0;
+}
+
+/* El piano mini no necesita clases extra, el JS le asigna el ancho exacto */
+
+.practice-controls { display: flex; gap: 10px; }
+
+/* ─── BOTONES PILL ──────────────────── */
+.pill-btn {
+  background: var(--rojo-claro); border: none; color: white;
+  padding: 10px 24px; border-radius: 20px;
+  cursor: pointer; font-family: 'Nunito', sans-serif;
+  font-weight: 700; font-size: 14px;
+  transition: background 0.15s, transform 0.1s;
+}
+.pill-btn:hover  { background: #ff5555; }
+.pill-btn:active { transform: scale(0.95); }
+.pill-btn.gray   { background: rgba(255,255,255,0.14); }
+.pill-btn.gray:hover { background: rgba(255,255,255,0.22); }
+.pill-btn.small  { padding: 7px 16px; font-size: 12px; }
+
+/* ─── RETO ──────────────────────────── */
+.reto-card { gap: 14px; }
+
+.reto-header {
+  display: flex; align-items: center;
+  gap: 20px; flex-wrap: wrap;
+}
+.reto-stat { display: flex; flex-direction: column; align-items: center; }
+.reto-label { font-size: 10px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.08em; }
+.reto-value { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--rojo-claro); }
+
+.tiles-arena {
+  position: relative; height: 280px;
+  background: rgba(0,0,0,0.55); border-radius: 12px;
+  overflow: hidden; border: 1px solid var(--border);
+}
+
+.tiles-overlay {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 16px; background: rgba(0,0,0,0.65); z-index: 5;
+}
+
+.tile-block {
+  position: absolute; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 15px; color: white;
+  animation: tileFall linear forwards;
+  box-shadow: inset 0 -4px 0 rgba(0,0,0,0.3);
+}
+@keyframes tileFall { from { top: -52px; } to { top: 100%; } }
+
+/* Piano del reto centrado */
+.reto-piano-wrap {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  overflow-x: auto;
+  padding: 4px 0;
+}
+
+/* ─── MELODÍAS ──────────────────────── */
+.mel-toolbar { display: flex; justify-content: space-between; align-items: center; }
+.melodias-list { display: flex; flex-direction: column; gap: 10px; }
+.empty-msg { text-align:center; color:rgba(255,255,255,0.38); padding:48px 0; font-size:14px; }
+
+.mel-item {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border); border-radius: 10px;
+  padding: 13px 16px; display: flex; align-items: center; gap: 12px;
+}
+.mel-icon {
+  width: 40px; height: 40px;
+  background: rgba(255,255,255,0.09); border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.mel-info { flex: 1; min-width: 0; }
+.mel-name { font-weight: 700; font-size: 14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.mel-meta { font-size: 11px; color: rgba(255,255,255,0.45); margin-top: 2px; }
+.mel-actions { display: flex; gap: 6px; }
+.mel-btn {
+  background: rgba(255,255,255,0.09);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 7px; color: white;
+  font-size: 13px; padding: 6px 13px; cursor: pointer;
+  transition: background 0.12s;
+}
+.mel-btn:hover { background: rgba(255,255,255,0.18); }
+.mel-btn.del   { border-color: rgba(255,80,80,0.4); color: #ff9090; }
+
+/* ─── PUNTAJES ──────────────────────── */
+.stats-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.stat-card {
+  flex: 1; min-width: 100px;
+  background: rgba(158,13,13,0.55);
+  border-radius: 10px; padding: 16px; text-align: center;
+}
+.stat-label { font-size: 11px; color: rgba(255,255,255,0.48); }
+.stat-val   { font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: white; }
+
+.leaderboard-card, .logros-card {
+  background: rgba(0,0,0,0.22); border-radius: 10px; padding: 16px;
+}
+.lb-title {
+  font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.42);
+  margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.08em;
+}
+
+.rank-row {
+  display: flex; align-items: center;
+  gap: 12px; padding: 9px 10px;
+  border-radius: 7px; margin-bottom: 4px;
+}
+.rank-row.me { background: rgba(255,49,49,0.14); }
+.rank-num  { color: rgba(255,255,255,0.4); font-size: 13px; width: 24px; }
+.rank-name { flex: 1; font-size: 14px; font-weight: 600; }
+.rank-pts  { color: var(--rojo-claro); font-weight: 700; font-size: 14px; }
+
+.logros-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.logro-badge {
+  padding: 6px 14px; border-radius: 20px; font-size: 12px;
+  border: 1px solid rgba(255,255,255,0.18);
+  color: rgba(255,255,255,0.45);
+}
+.logro-badge.earned { background: rgba(255,200,0,0.12); border-color: gold; color: gold; }
+
+/* ─── RESPONSIVE ─────────────────────── */
+@media (max-width: 700px) {
+  .left-panel  { display: none; }
+  .main-stage  { gap: 8px; padding: 0 6px; }
+  .modal-card  { padding: 14px 10px; }
+  .reto-header { gap: 10px; }
+  .tiles-arena { height: 200px; }
+}

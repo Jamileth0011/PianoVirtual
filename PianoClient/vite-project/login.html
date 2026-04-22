@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Piano Virtual — Entrar</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --r:#9e0d0d; --rc:#ff3131; }
+    *{ box-sizing:border-box; margin:0; padding:0; }
+    body{
+      background:var(--r);
+      font-family:'Nunito',sans-serif;
+      color:white;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .card{
+      background:rgba(0,0,0,0.55);
+      border:1px solid rgba(255,255,255,0.1);
+      border-radius:18px;
+      padding:44px 38px;
+      width:340px;
+      text-align:center;
+    }
+    .logo{ font-family:'Bebas Neue',sans-serif; font-size:46px; letter-spacing:5px; }
+    .sub{ font-size:13px; color:rgba(255,255,255,0.45); margin-bottom:30px; }
+    .tabs{
+      display:flex; margin-bottom:22px;
+      border-radius:9px; overflow:hidden;
+      border:1px solid rgba(255,255,255,0.14);
+    }
+    .tab{
+      flex:1; padding:10px;
+      background:transparent; border:none;
+      color:rgba(255,255,255,0.5);
+      cursor:pointer; font-family:'Nunito',sans-serif;
+      font-size:14px; font-weight:700;
+      transition:all 0.2s;
+    }
+    .tab.active{ background:var(--rc); color:white; }
+    .field{
+      width:100%; padding:12px 14px; margin-bottom:12px;
+      background:rgba(255,255,255,0.07);
+      border:1px solid rgba(255,255,255,0.14);
+      border-radius:9px; color:white;
+      font-size:14px; font-family:'Nunito',sans-serif;
+      transition:border-color 0.2s;
+    }
+    .field::placeholder{ color:rgba(255,255,255,0.3); }
+    .field:focus{ outline:none; border-color:var(--rc); }
+    .submit{
+      width:100%; padding:13px;
+      background:var(--rc); border:none;
+      border-radius:9px; color:white;
+      font-size:15px; font-weight:700;
+      font-family:'Nunito',sans-serif;
+      cursor:pointer; transition:background 0.2s;
+    }
+    .submit:hover{ background:#ff5555; }
+    .msg{ margin-top:14px; font-size:13px; min-height:20px; color:#ff9999; }
+    .emoji-piano{ font-size:44px; margin-bottom:8px; }
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="emoji-piano">🎹</div>
+  <div class="logo">PIANO</div>
+  <div class="sub">Simulador Virtual</div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="tab('login')">Entrar</button>
+    <button class="tab"       onclick="tab('register')">Registrarse</button>
+  </div>
+
+  <!-- LOGIN -->
+  <div id="frm-login">
+    <input class="field" id="l-user" placeholder="Tu nombre de usuario" type="text"
+           onkeydown="if(event.key==='Enter')login()"/>
+    <input class="field" id="l-pass" placeholder="Contraseña" type="password"
+           onkeydown="if(event.key==='Enter')login()"/>
+    <button class="submit" onclick="login()">Entrar al piano</button>
+  </div>
+
+  <!-- REGISTRO -->
+  <div id="frm-register" style="display:none">
+    <input class="field" id="r-user"  placeholder="Nombre de usuario" type="text"/>
+    <input class="field" id="r-email" placeholder="Correo electrónico" type="email"/>
+    <input class="field" id="r-pass"  placeholder="Contraseña" type="password"/>
+    <button class="submit" onclick="register()">Crear cuenta</button>
+  </div>
+
+  <div class="msg" id="msg"></div>
+</div>
+
+<script>
+const API = 'http://localhost:5000/api'
+
+function tab(t) {
+  document.getElementById('frm-login').style.display     = t==='login'    ? '' : 'none'
+  document.getElementById('frm-register').style.display  = t==='register' ? '' : 'none'
+  document.querySelectorAll('.tab').forEach((b,i) => b.classList.toggle('active', i===(t==='login'?0:1)))
+  msg('')
+}
+
+async function login() {
+  const usuario  = document.getElementById('l-user').value.trim()
+  const password = document.getElementById('l-pass').value
+  if (!usuario || !password) { msg('Completa los dos campos'); return }
+
+  try {
+    const res = await fetch(`${API}/auth/login`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ usuario, password })
+    })
+    if (!res.ok) { msg('Usuario o contraseña incorrectos'); return }
+    const data = await res.json()
+    localStorage.setItem('token', data.token)
+  } catch {
+    // Sin servidor → modo local (válido para el proyecto)
+  }
+
+  // SIEMPRE guardamos el nombre que escribió el usuario
+  localStorage.setItem('usuario', usuario)
+  window.location.href = '/index.html'
+}
+
+async function register() {
+  const usuario  = document.getElementById('r-user').value.trim()
+  const email    = document.getElementById('r-email').value.trim()
+  const password = document.getElementById('r-pass').value
+  if (!usuario || !email || !password) { msg('Completa todos los campos'); return }
+
+  try {
+    const res = await fetch(`${API}/auth/register`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ usuario, email, password })
+    })
+    if (!res.ok) { msg('Error al registrar (usuario ya existe?)'); return }
+    msg('✅ Cuenta creada. Ahora entra.')
+    tab('login')
+    document.getElementById('l-user').value = usuario
+  } catch {
+    // Sin servidor
+    localStorage.setItem('usuario', usuario)
+    msg('✅ Guardado localmente. Entrando...')
+    setTimeout(() => { window.location.href = '/index.html' }, 900)
+  }
+}
+
+function msg(t) { document.getElementById('msg').textContent = t }
+
+// Si ya está logueado, pasar directo
+if (localStorage.getItem('usuario')) {
+  window.location.href = '/index.html'
+}
+</script>
+</body>
+</html>
